@@ -1,0 +1,601 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\usepackage{listings}
+\usepackage{epsfig}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+\begin{document}
+\lstset{language=Matlab,%
+    %basicstyle=\color{red},
+    breaklines=true,%
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+    %emph=[2]{word1,word2}, emphstyle=[2]{style},    
+}
+%https://tex.stackexchange.com/questions/75116/what-can-i-use-to-typeset-matlab-code-in-my-document%
+
+% ---------------------------------TITLE PAGE -----------------------------------
+\begin{titlepage}
+\begin{center}
+
+\text{ECE 8540}
+\text{Analysis of Tracking Systems}\\[5cm]
+% \vspace{0.5cm}
+
+
+% Title
+\HRule \\[0.4cm]
+{ \LARGE 
+  \textbf{Lab 4- Kalman Filtering}\\[0.5cm]
+}
+\HRule \\[1.5cm]
+\date{}
+\author{Mayuresh Bhosale}
+
+% Author
+{ \large
+  Mayuresh Bhosale \\[0.1cm]
+  \texttt{mbhosal@clemson.edu}
+}
+
+\vfill
+
+%\textsc{\Large Cyprus University of Technology}\\[0.4cm]
+\textsc{\large Department of Automotive Engineering,\\Clemson University}\\[0.4cm]
+
+
+% Bottom
+{\large \today}
+ 
+\end{center}
+\end{titlepage}
+
+% ---------------------------------SECOND PAGE -----------------------------------
+\newpage
+
+\section{Introduction}\label{sec:intro}
+
+The lab report addresses problem of applying Kalman Filter for multiple measurements. Measurements are set of points over time with error value to be filtered. Error or noise is deviation from true value. True value is not always the same as the measurements. Kalman Filtering is performed to obtain the best estimate of true value from measurements. Kalman filtering can be applied in real time as well as to recorded measurements. Previous methods such as model fitting techniques are used to get the best estimate over set of measurements. The model fitting method cannot be applied in real time. Kalman filtering is applied to accurately predict the next value from the previous measurement. Weights or gains are applied in Kalman filtering to predictions and measurements to obtain true values.
+
+
+\section{Methodology}
+Kalman filtering is done with set of equations that continuously predict and update the value. Firstly, the next state and the state covariance are predicted. After the prediction, the sensor recorded measurement is obtained and Kalman gain is calculated. The Kalman gain consists of weights that are applied to the prediction and the measured value. Based on this Kalman gain, the state and state covariance is updated. The updated state provides final output for that particular state and this cycle is repeated over time. The following equations define Kalman filtering:
+
+1. Predict next state
+\newline
+\begin{equation}\label{eq:1}
+X_{t,t -1} = \Phi X_{t-1,t-1}
+\end{equation}
+
+
+2. Predict next state covariance
+\begin{equation}\label{eq:2}
+S_{t,t -1} = \Phi S_{t-1,t-1}\Phi^{T} + Q
+\end{equation}
+
+
+3. Obtain measurement(s)
+\begin{equation}\label{eq:3}
+Y_t
+\end{equation}
+
+4. Calculate the Kalman gain (weights)
+\begin{equation}\label{eq:4}
+K_{t} = S_{t,t-1}M^T[MS_{t,t-1}M^T + R]^{-1}
+\end{equation}
+
+5. Update state
+\begin{equation}\label{eq:5}
+X_{t,t} = X_{t,t-1} + K_t(Y_t-MX_{t,t-1})
+\end{equation}
+
+6. Update state covariance
+\begin{equation}\label{eq:6}
+S_{t,t} = [I - K_tM]S_{t,t-1}
+\end{equation}
+
+7. Loop (t becomes t+1)
+
+Here, the initial state, state covariance and measurement values are to be defined.Moreover depending on the state variables the all the matrices should be checked before executing the loop. The dynamic noise covariance Q and measurement noise covariance R are adjusted and defined by the user. The update state provides final output value at that time step.
+
+\subsection{1-D Kalman Filtering}
+Following equations define the matrices to solve the 1D Kalman filtering to estimate position with a constant velocity model.
+
+1. State variables
+ \begin{equation}\label{eq:7}
+ \mathbf{X_t} =
+ \begin{bmatrix}
+x_t\\
+ \dot x_t\\
+\end{bmatrix}
+\end{equation}
+
+2. State transition equations
+\begin{equation}\label{eq:8}
+x_{t+1} = x_t + T\dot x_t
+\end{equation}
+\begin{equation}\label{eq:9}
+\dot x_{t+1} = \dot x_t
+\end{equation}
+
+State transition matrix based on the state variables and state transition equations on can be written as matrix in equation \ref{eq:10}. Here the time step T is written as 1 for 1 second interval.
+
+ \begin{equation}\label{eq:10}
+ \mathbf{\Phi} =
+ \begin{bmatrix}
+1 &T\\
+0 &1\\
+\end{bmatrix}
+\end{equation}
+
+3. Observation variables are defined as:
+ \begin{equation}\label{eq:11}
+ \mathbf{Y_t} =
+ \begin{bmatrix}
+\Tilde{x_t}\\
+\end{bmatrix}
+\end{equation}
+here, $\Tilde{x_t}$ is 1-D measurement at consecutive time steps t.
+
+4. Observation equation is written as:
+\begin{equation}\label{eq:12}
+\Tilde{x_t} = x_t 
+\end{equation}
+
+5. State covariance matrix $S_t$ that defines the covariance of the state variables is written as:
+
+ \begin{equation}\label{eq:13}
+ \mathbf{S_t} =
+ \begin{bmatrix}
+ \sigma _{x_t}^2 &\sigma _{x_t,\dot x_t}\\
+\sigma _{x_t,\dot x_t} &\dot \sigma _{x_t}^2\\
+\end{bmatrix}
+\end{equation}
+here, as there are two variables in the state, the matrix size is 2x2
+
+6. The dynamic noise covariance matrix Q and measurement noise covariance matrix R can be written as:
+
+ \begin{equation}\label{eq:14}
+ \mathbf{Q} =
+ \begin{bmatrix}
+0 & 0\\
+0 & \sigma _a ^2\\
+\end{bmatrix}
+\end{equation}
+
+ \begin{equation}\label{eq:15}
+ \mathbf{R} =
+ \begin{bmatrix}
+\sigma _n ^2\\
+\end{bmatrix}
+\end{equation}
+
+7. The observation matrix M is 1x2 matrix as defined below:
+ \begin{equation}\label{eq:16}
+ \mathbf{M} =
+ \begin{bmatrix}
+1 & 0\\
+\end{bmatrix}
+\end{equation}
+
+The final step after defining matrices is to check the size of matrices in the Kalman filtering equations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{2-D Kalman Filtering}
+Following equations define the matrices to solve the 2D Kalman filtering to estimate position with a constant velocity model.
+
+1. State variables
+ \begin{equation}\label{eq:17}
+ \mathbf{X_t} =
+ \begin{bmatrix}
+x_t\\
+t_t\\
+ \dot x_t\\
+  \dot y_t\\
+\end{bmatrix}
+\end{equation}
+
+2. State transition equations
+\begin{equation}\label{eq:18}
+x_{t+1} = x_t + T\dot x_t
+\end{equation}
+\begin{equation}\label{eq:19}
+y_{t+1} = y_t + T\dot y_t
+\end{equation}
+\begin{equation}\label{eq:20}
+\dot x_{t+1} = \dot x_t
+\end{equation}
+\begin{equation}\label{eq:21}
+\dot y_{t+1} = \dot y_t
+\end{equation}
+
+State transition matrix based on the state variables and state transition equations on can be written as matrix in equation \ref{eq:22}. Here the time step T is written as 1 for 1 second interval.
+
+ \begin{equation}\label{eq:22}
+ \mathbf{\Phi} =
+ \begin{bmatrix}
+1 & 0& T& 0\\
+0 & 1& 0& T\\
+0 & 0& 1& 0\\
+0 & 0& 0& 1\\
+\end{bmatrix}
+\end{equation}
+
+3. Observation variables are defined as:
+ \begin{equation}\label{eq:11}
+ \mathbf{Y_t} =
+ \begin{bmatrix}
+\Tilde{x_t}\\
+\Tilde{y_t}\\
+\end{bmatrix}
+\end{equation}
+here, $\Tilde{x_t}$ is 1-D measurement at consecutive time steps t.
+
+4. Observation equation is written as:
+\begin{equation}\label{eq:12}
+\Tilde{x_t} = x_t 
+\end{equation}
+\begin{equation}\label{eq:12}
+\Tilde{y_t} = y_t 
+\end{equation}
+
+5. State covariance matrix $S_t$ that defines the covariance of the state variables is written as:
+
+ \begin{equation}\label{eq:13}
+ \mathbf{S_t} =
+ \begin{bmatrix}
+ \sigma _{x_t}^2 &\sigma _{x_t,y_t} &\sigma _{x_t,\dot x_t} &\sigma _{x_t,\dot y_t}\\
+\sigma _{x_t,y_t}& \sigma _{y_t}^2 &\sigma _{y_t,\dot x_t}& \sigma _{y_t,\dot y_t}\\
+\sigma _{x_t,\dot x_t} &\sigma _{y_t,\dot x_t} &\sigma _{\dot x_t}^2 &\sigma _{\dot y_t,\dot y_t}\\
+\sigma _{x_t,\dot y_t} &\sigma _{y_t,\dot y_t} &\sigma _{\dot y_t,\dot y_t} &\sigma _{\dot y_t}^2
+\end{bmatrix}
+\end{equation}
+here, as there are two variables in the state, the matrix size is 2x2
+
+6. The dynamic noise covariance matrix Q and measurement noise covariance matrix R can be written as:
+
+ \begin{equation}\label{eq:14}
+ \mathbf{Q} =
+ \begin{bmatrix}
+0 & 0& 0& 0\\
+0 & 0& 0& 0\\
+0& 0& \sigma _{a_1}^2 & \sigma _{a_1,a_2} \\
+0& 0& \sigma _{a_1,a_2} &\sigma _{a_2}^2  \\
+\end{bmatrix}
+\end{equation}
+
+ \begin{equation}\label{eq:15}
+ \mathbf{R} =
+ \begin{bmatrix}
+\sigma _n_1 ^2 & \sigma _{n_1,n_2}\\
+\sigma _{n_1,n_2} & \sigma _n_2 ^2\\
+\end{bmatrix}
+\end{equation}
+
+7. The observation matrix M is 1x2 matrix as defined below:
+ \begin{equation}\label{eq:16}
+ \mathbf{M} =
+ \begin{bmatrix}
+1 & 0 & 0 & 0\\
+0 & 1 & 0 & 0\\
+\end{bmatrix}
+\end{equation}
+
+The final step after defining matrices is to check the size of matrices in the Kalman filtering equations.
+
+\subsection{MATLAB Programming and Implementation}
+The Kalman filtering are further solved by using MATLAB Scripts. R2021a version of MATLAB was used on a Windows 11 Operating System. All the matrices were constructed in MATLAB and the update state $X_{t,t}$ is calculated. To visualize the Kalman filtering, graphs were plotted depicting Kalman filtered output to the measured data.
+
+\section{Results}
+\subsection{1-D Kalman Filtering}\label{1D Kalman FIltering}
+The Kalman filtered output of 1-D measured data is calculated and plotted. Different iterations are performed for multiple measurement noise covariance R and dynamic noise covariance Q. The Table 1 shows 3 iterations made for Q and R values to obtain the results against 1-D measured data.
+
+\begin{table}[h!]
+\centering
+\caption{Trials of dynamic noise covariance matrix Q and measurement Noise covariance matrix R for 1-D Kalman filtering}
+\begin{tabular}{ |c|c|c|c| } 
+\hline
+Trial No& R $(\sigma _n^2)$ & Q $(\sigma _a^2)$\\
+\hline
+1& 1 & 10 \\ 
+\hline
+2& $10^{4}$ & $10^{-4}$ \\ 
+\hline
+3& $10^{10}$ & $10^{-10}$ \\ 
+\hline
+\end{tabular}
+\label{table:1}
+\end{table}
+
+\subsubsection{Trial 1}
+Figure 1 shows results from Kalman filtering for R = 1 and Q = 10. In this trial, the measurement noise covariance in the Kalman filtering equations is weighted lower than the dynamic noise covariance. Here it is considered that there is huge impact of the dynamic noise on the filtered output than the measurement noise. As observed in Figure 1, the filtered output largely matches the measurement readings. The top plot consists Kalman filtered output with respect to measured data with reduced data points and bottom plot is the similar to top plot but with all the data points included.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Trial_1_Graph_1.eps}
+\includegraphics[scale=0.75]{Trial_1_Graph_2.eps}
+\caption{Trial 1 Results for Kalman filtering for R$(\sigma _n^2)$ = 1 and Q$(\sigma _a^2)$ = 10}
+\label{1D_Trial_1}
+\end{figure}
+
+\subsubsection{Trial 2}
+Figure 2 shows results from Kalman filtering for $R = 10^4$ and $Q = 10^{-4}$. In this trial, the measurement noise covariance in the Kalman filtering equations is weighted higher than the dynamic noise covariance. Here it is considered that there is more impact of the measurement noise on the filtered output than the dynamic noise. As observed in Figure 2, the filtered output largely matches the approximate average of measurement readings. The top plot consists Kalman filtered output with respect to measured data with reduced data points and bottom plot is the similar to top plot but with all the data points included. If we observe carefully, at initial stages the kalman filtered output takes time till 70 data points to match the average of measured data and achieves a stable state after 70 readings.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Trial_2_Graph_1.eps}
+\includegraphics[scale=0.75]{Trial_2_Graph_2.eps}
+\caption{Trial 2 Results for Kalman filtering for R$(\sigma _n^2)$ = $10^4$ and Q$(\sigma _a^2)$ = $10^{-4}$}
+\label{1D_Trial_2}
+\end{figure}
+
+\subsubsection{Trial 3}
+Figure 3 shows results from Kalman filtering for $R = 10^4$ and $Q = 10^{-4}$. In this trial, the measurement noise covariance in the Kalman filtering equations is weighted higher than the dynamic noise covariance. Here it is considered that there is significant impact of the measurement noise on the filtered output than the dynamic noise. As observed in Figure 2, the filtered output does not deviate from abnormalities in the measurement readings. The top plot consists Kalman filtered output with respect to measured data with reduced data points and bottom plot is the similar to top plot but with all the data points included. Since there is no impact of measurements on the Kalman filtered output, the straight line plotted corresponds to the initial reading of 0 with almost zero dynamic noise.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{Trial_4_Graph_1.eps}
+\includegraphics[scale=0.75]{Trial_4_Graph_2.eps}
+\caption{Trial 3 Results for Kalman filtering for R$(\sigma _n^2)$  = $10^{10}$ and Q$(\sigma _a^2)$ = $10^{-10}$}
+\label{1D_Trial_2}
+\end{figure}
+
+\subsection{2-D Kalman Filtering}\label{2D Kalman FIltering}
+The Kalman filtered output of 2-D measured data is calculated and plotted. The X-position and Y-position measured and filtered data are plotted separately over number of data points. Different iterations are performed for multiple measurement noise covariance R and dynamic noise covariance Q. The Table 2 and 3 shows 3 iterations made for Q and R values to obtain the results against 2-D measured data.
+
+\begin{table}[h!]
+\centering
+\caption{Trials of dynamic noise covariance matrix Q for 2-D Kalman filtering}
+\begin{tabular}{ |c|c|c|c|c| } 
+\hline
+Trial No& $\sigma _{n_1}^2$ & $\sigma _n_1,n_2$ & $\sigma _n_1,n_2$ & $ \sigma _{n_2}^2$\\
+\hline
+1 & 10 &  0.1 & 0.1 & 10\\ 
+\hline
+2& $10^{-4}$ & $10^{-3}$ & $10^{-3}$ & $10^{-4}$ \\ 
+\hline
+3& $10^{-10}$ & $10^{-2}$ & $10^{-2}$ & $10^{-10}$ \\ 
+\hline
+\end{tabular}
+\label{table:1}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\caption{Trials of measurement noise covariance matrix R for 2-D Kalman filtering}
+\begin{tabular}{ |c|c|c|c|c| } 
+\hline
+Trial No& $\sigma _{a_1}^2$ & $\sigma _a_1,a_2$ & $\sigma _a_1,a_2$ & $ \sigma _{a_2}^2$\\
+\hline
+1 & 1 &  0.1 & 0.1 & 1\\ 
+\hline
+2& $10^{4}$ & $10^{-1}$ & $10^{-1}$ & $10^{4}$ \\ 
+\hline
+3& $10^{10}$ & $10^{-1}$ & $10^{-1}$ & $10^{10}$ \\ 
+\hline
+\end{tabular}
+\label{table:1}
+\end{table}
+
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{2D_Trial_1_Graph_X.eps}
+\includegraphics[scale=0.75]{2D_Trial_1_Graph_Y.eps}
+\caption{Trial 1 Results for 2-D Kalman filtering (Top - X-postion, Bottom - Y-position)}
+\label{2D_Trial_1}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{2D_Trial_2_Graph_X.eps}
+\includegraphics[scale=0.75]{2D_Trial_2_Graph_Y.eps}
+\caption{Trial 2 Results for 2-D Kalman filtering (Top - X-postion, Bottom - Y-position)}
+\label{2D_Trial_2}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.75]{2D_Trial_3_Graph_X.eps}
+\includegraphics[scale=0.75]{2D_Trial_3_Graph_Y.eps}
+\caption{Trial 3 Results for 2-D Kalman filtering (Top - X-postion, Bottom - Y-position)}
+\label{2D_Trial_3}
+\end{figure}
+
+\subsubsection{Trial 1}
+Figure 4 shows results from Kalman filtering for trial 1, R and Q matrices values mentioned in Table 2 and 3. X-axis represents number of data points and Y-axis represents the respective position data. In this trial, the measurement noise covariance in the Kalman filtering equations is weighted lower than the dynamic noise covariance. Here it is considered that there is huge impact of the dynamic noise on the filtered output than the measurement noise. As observed in Figure 4, the filtered output largely matches the measurement readings. The top plot consists Kalman filtered output with respect to X-positions and bottom plot consists Kalman filtered output with respect to Y-positions.
+
+\subsubsection{Trial 2}
+Figure 5 shows results from Kalman filtering for trial 2, R and Q matrices values mentioned in Table 2 and 3. X-axis represents number of data points and Y-axis represents the respective position data. In this trial, the measurement noise covariance in the Kalman filtering equations is weighted higher than the dynamic noise covariance. Here it is considered that there is more impact of the measurement noise on the filtered output than the dynamic noise. As observed in Figure 5, the filtered output is largely deviating from measurement readings. The top plot consists Kalman filtered output with respect to X-positions and bottom plot consists Kalman filtered output with respect to Y-positions.
+
+\subsubsection{Trial 3}
+Figure 6 shows results from Kalman filtering for trial 3, R and Q matrices values mentioned in Table 2 and 3. X-axis represents number of data points and Y-axis represents the respective position data. In this trial, the measurement noise covariance in the Kalman filtering equations is weighted significantly higher than the dynamic noise covariance. Here it is considered that there is high impact of the measurement noise on the filtered output than the dynamic noise. As observed in Figure 6, the filtered output does not deviate due to changes in measurement data. The Kalman filtered output is a horizontal line corresponding to the initial defined value of the state variables. The top plot consists Kalman filtered output with respect to X-positions and bottom plot consists Kalman filtered output with respect to Y-positions.
+
+\newpage
+\section{Conclusion}
+Following are they key points that can be concluded from Kalman Filtering technique applied in this lab:
+\begin{itemize}
+\item Dynamic noise covariance and measurement noise covariance is to be weighed by the user to generate the accurate Kalman filtered output. 
+\item Sensor properties providing accuracy are useful tools to determine the measurement noise covariance matrix. Such knowledge assists to get accurate Kalman filtered output.
+\item As depicted in Figure 2 and Trial 2 of 1-D Kalman filtering, Kalman filtered output generates accurate values after certain time has passed. In a dynamic system where Kalman filter is applied, it is always better to have a delay before getting accurate estimate from Kalman Filter.
+\item Accuracy of noise covariances can only be determined if we compare Kalman filtered output to the ground truth data.
+\item Kalman filtering is an excellent technique that is used broadly in various applications to obtain the best estimate of true value.
+
+\end{itemize}
+
+\section{Appendix}
+The code for this lab can be found below:
+\begin{lstlisting}
+% This Program is written by Mayuresh Bhosale that depicts Kalman Filter
+% applied to 1-D and 2-D data
+
+clc
+clear all
+close all
+%1-D Data & Plot
+Adata = importdata('1D-data.txt');
+xaxis = 1:height(Adata);
+
+
+%Initializing
+x_t = [0; 0]; %Position and Velocity Initialization
+Q_t = [0 1]; %Dynamic Noise
+Y_t = 0; %Measurement
+% R_t = 1; %Measurement Noise
+S = [1 0; 0 1]; % State Covariance Matrix
+Q_var = [0 0; 0 10^(-10)]; %Dynamic noise Covariance Matrix
+R_var = 10^10; %Measurement Covariance Matrix
+Phi = [1 1; 0 1]; %State transition Matrix
+M = [1 0]; %Observation Matrix
+I = eye(2); %Identity matrix
+
+%Equations for Kalman Filtering
+
+for i = 1:height(Adata)
+    %Predict next state
+    x_tt1 = Phi*x_t;
+    %Predict Next State Covariance
+    S_tt1 = Phi*S*Phi'+Q_var;
+    %Obtain Measurements
+    Y_t = Adata(i);
+    %Calculating Kalman Gain
+    K_t = S_tt1*M'* inv(M*S_tt1*M' + R_var);
+    %Update State
+    x_t = x_tt1 + K_t*(Y_t-M*x_tt1);
+    X_t(i) = x_t(1);
+    %Update State Covariance
+    S = (I - K_t*M)*S_tt1;
+end
+t1 = tiledlayout(1,1);
+nexttile
+%Plotting Reduced Data
+plot(xaxis(1:10:639),Adata(1:10:639),'b',"LineWidth",1);
+xlabel('Number of Data Points');
+ylabel('Position Reading');
+title('1-D position data (Reduced data points)');
+hold on
+plot(xaxis(1:10:639),X_t(1:10:639),"LineWidth",1);
+legend('1-D Measured Data','Kalman Filtered Output')
+xlim([-30,670])
+ylim([-3,4])
+hold off
+exportgraphics(t1,'Trial_4_Graph_1.eps')
+
+t2 = tiledlayout(1,1);
+nexttile
+%Plotting Reduced Data
+plot(xaxis,Adata,'b',"LineWidth",1);
+xlabel('Number of Data Points');
+ylabel('Position Reading');
+title('1-D position data');
+hold on
+plot(xaxis,X_t,"LineWidth",1);
+legend('1-D Measured Data','Kalman Filtered Output')
+xlim([-30,670])
+ylim([-3,4.5])
+hold off
+exportgraphics(t2,'Trial_4_Graph_2.eps')
+
+% This Program is written by Mayuresh Bhosale that depicts Kalman Filter
+% applied to 1-D and 2-D data
+
+clc
+clear all
+close all
+%1-D Data & Plot
+Adata = importdata('2D-UWB-data.txt');
+xaxis = 1:height(Adata);
+
+%Initializing
+X_t = [Adata(1,1); Adata(1,2); 0; 0]; %Position and Velocity Initialization
+Q_t = [0 1]; %Dynamic Noise
+Y_t = [0 0]; %Measurement
+% R_t = [0.01 0.0001; 
+% %        0.001 0.01]; %Measurement Noise
+% R_t = [1 0.1; 
+%        0.1 1]; %Measurement Noise
+
+S = [1 0 0 0;
+     0 1 0 0;
+     0 0 1 0;
+     0 0 0 1]; % State Covariance Matrix
+Q_var = [0 0 0 0; 
+         0 0 0 0; 
+         0 0 1 0.1; 
+         0 0 0.1 1]; %Dynamic noise Covariance Matrix
+R_var = [25 0.1; 
+       0.1 25]; %Measurement Covariance Matrix
+Phi = [1 0 1 0; 
+       0 1 0 1; 
+       0 0 1 0; 
+       0 0 0 1]; %State transition Matrix
+M = [1 0 0 0; 
+     0 1 0 0]; %Observation Matrix
+I = eye(4); %Identity matrix
+
+%Equations for Kalman Filtering
+
+for i = 1:height(Adata)
+    %Predict next state
+    x_tt1 = Phi*X_t;
+    %Predict Next State Covariance
+    S_tt1 = Phi*S*Phi'+Q_var;
+    %Obtain Measurements
+    Y_t = [Adata(i,1); Adata(i,2)];
+    %Calculating Kalman Gain
+    K_t = S_tt1*M'* inv(M*S_tt1*M' + R_var);
+    %Update State
+    X_t = x_tt1 + K_t*(Y_t-M*x_tt1);
+    X1(i) = X_t(1,1);
+    X2(i) = X_t(2,1);
+    %Update State Covariance
+    S = (I - K_t*M)*S_tt1;
+end
+
+t1 = tiledlayout(1,1);
+nexttile
+%Plotting Reduced Data
+plot(xaxis,Adata(:,1),'b',"LineWidth",1);
+xlabel('Number of Data Points');
+ylabel('X Position Reading');
+title('2-D X position data');
+hold on
+plot(xaxis,X1,"LineWidth",1);
+legend('X - 2-D Measured Data','Kalman Filtered Output')
+xlim([-10,140])
+ylim([250,570])
+hold off
+exportgraphics(t1,'2D_Trial_4_Graph_X.eps')
+
+t2 = tiledlayout(1,1);
+nexttile
+%Plotting Reduced Data
+plot(xaxis,Adata(:,2),'b',"LineWidth",1);
+xlabel('Number of Data Points');
+ylabel('Y Position Reading');
+title('2-D Y position data');
+hold on
+plot(xaxis,X2,"LineWidth",1);
+legend('Y - 2-D Measured Data','Kalman Filtered Output')
+xlim([-10,140])
+ylim([330,770])
+hold off
+exportgraphics(t2,'2D_Trial_4_Graph_Y.eps')
+
+\end{lstlisting}
+
+\end{document}

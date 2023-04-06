@@ -1,4 +1,4 @@
-# Extended Kalman Filter
+# Extended Kalman Filtering
 
 Kalman filters can be applied when both the system and the measurements are linear in nature but if either of them becomes non linear like the case of RADAR measurement , 
 wherein it is measuring an object that follows linear  behaviour but the measurements are in terms of polar coordinates (range and azhimuth), in that case we can no longer apply Kalman filters.

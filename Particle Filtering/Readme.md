@@ -15,3 +15,5 @@ Results of ground truth data, filtered estimates, and measured data for particle
 Distribution of particles at time step 36 second:
 
 ![](Result2.png)
+
+More details about equations, methods, results and analysis of particle filtering is mentioned in Particle_Filtering.pdf

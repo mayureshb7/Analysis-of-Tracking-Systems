@@ -11,5 +11,5 @@ A particle filter has been implemented to track the position of the object based
 Results of ground truth data, filtered estimates, and measured data for particle filtering
 ![](Result1.png)
 
-Distribution of particles at time step = 36 second
+Distribution of particles at time step 36 second
 ![](Result2.png)

@@ -8,10 +8,10 @@ In the current problem an object is moving in a reciprocating fashion in a 1 dim
 
 A particle filter has been implemented to track the position of the object based on the field strength measurement.
 
-Results of ground truth data, filtered estimates, and measured data for particle filtering
+Results of ground truth data, filtered estimates, and measured data for particle filtering:
 
 ![](Result1.png)
 
-Distribution of particles at time step 36 second
+Distribution of particles at time step 36 second:
 
 ![](Result2.png)

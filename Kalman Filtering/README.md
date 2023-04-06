@@ -1,4 +1,4 @@
-# Kalman Filter
+# Kalman Filtering
 
 In this project, Kalman filtering has been applied for 1 dimensional and 2 dimensional measurement data. 
 In both the cases constant velocity model has been applied.
